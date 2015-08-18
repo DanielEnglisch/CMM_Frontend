@@ -1,0 +1,1 @@
+int Main(){	int i,o;	float f;	double d;	char c;	string s;	char[2] ca;		s = (string) ca;		return i;}

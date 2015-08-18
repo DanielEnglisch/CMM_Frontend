@@ -1,0 +1,736 @@
+$package=com.oracle.truffle.cmm.parser
+
+/*-------------------------------------------------------------------------
+CMM Compiler description for C--
+=== ============================
+-------------------------------------------------------------------------*/
+
+COMPILER CMM
+
+//-------------- Global Variables -------------------------------//
+
+	public Tab			tab;                     // symbol table
+	public boolean[]	debug = new boolean[10]; // debug switches
+	public Obj			currProc = null;
+  
+  
+//---------- LL(1) conflict resolvers ---------------------------//
+
+	// Returns true if a VarDecl comes next in the input
+	boolean isVarDecl() { 
+		if (la.kind == _ident || la.val.equals("int") || la.val.equals("float") || la.val.equals("char")) {
+			Token x = scanner.Peek();
+			while (x.kind != _semicolon) {
+				if (x.kind == _EOF || x.kind == _lpar || x.kind == _assign) return false;
+				x = scanner.Peek();
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	// Returns true if the next input is an Expr and not a '(' Condition ')'
+	boolean isExpr() { 
+		if (la.kind == _bang) return false;
+		else if (la.kind == _lpar) {
+			Token x = scanner.Peek();
+			while (x.kind != _rpar && x.kind != _EOF) {
+				if (x.kind == _eql || x.kind == _neq || x.kind == _lss || x.kind == _leq || x.kind == _gtr || x.kind == _geq) return false;
+				x = scanner.Peek();
+			}
+			return x.kind == _rpar;
+		} else return true;
+	}
+	
+
+	// Returns true if the next input is a type cast (requires symbol table)
+	// Returns true if the next input is a type cast (requires symbol table)
+	boolean isCast() {
+		Token x = scanner.Peek();
+		if (x.kind != _ident) return false;
+		Obj obj = tab.find(x.val);
+		return obj.kind == Obj.TYPE;
+	}
+	
+//---------- Method to get the number of errors ------------------------//
+	
+	public int getErrorCount() {
+		return errors.count;
+	}
+	
+	public HashMap<Integer,String> getErrorList()
+	{
+		return errors.errorList;
+	}
+	
+	
+//---------------- conversion of strings to constants ----------------//
+
+	// Convert a digit string into an int
+	public int intVal(String s) {
+		return Integer.parseInt(s);
+	}
+
+	// Convert a string representation of a float constant into a float value
+	public float floatVal(String s) {
+		return Float.parseFloat(s);
+	}
+	
+		public double doubleVal(String s) {
+			return Double.parseDouble(s);
+		}
+
+	public char charVal(String s) {
+		return s.replaceAll("\'", "").charAt(0);
+	}
+	
+	public String stringVal(String s) {
+		String res = s.substring(1);
+		return res.substring(0, res.length() - 1);
+	}
+	
+// ---------------- Casting -------------------------//
+
+	public Node cast(Struct type, Node fac_n) {
+
+		if (type.kind == Struct.INT) {
+			if (fac_n.type.kind == Struct.FLOAT) {
+				return new Node(Node.F2I, fac_n, null, type);
+
+			} else if (fac_n.type.kind == Struct.DOUBLE) {
+				return new Node(Node.D2I, fac_n, null, type);
+
+			} else if (fac_n.type.kind == Struct.CHAR) {
+				return new Node(Node.C2I, fac_n, null, type);
+			} else
+				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to INT!");
+
+		} else if (type.kind == Struct.CHAR) {
+			if (fac_n.type.kind == Struct.INT) {
+				return new Node(Node.I2C, fac_n, null, type);
+			} else
+				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to CHAR!");
+		} else if (type.kind == Struct.FLOAT) {
+			if (fac_n.type.kind == Struct.INT) {
+				return new Node(Node.I2F, fac_n, null, type);
+			} else if (fac_n.type.kind == Struct.CHAR) {
+				return new Node(Node.C2F, fac_n, null, type);
+			} else
+				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to FLOAT!");
+		} else if (type.kind == Struct.DOUBLE) {
+			if (fac_n.type.kind == Struct.INT) {
+				return new Node(Node.I2D, fac_n, null, type);
+			} else if (fac_n.type.kind == Struct.FLOAT) {
+				return new Node(Node.F2D, fac_n, null, type);
+			} else if (fac_n.type.kind == Struct.CHAR) {
+				return new Node(Node.C2D, fac_n, null, type);
+			} else
+				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to DOUBLE!");
+		} else if (type.kind == Struct.STRING) {
+
+			if (fac_n.type.kind == Struct.ARR && fac_n.type.elemType.kind == Struct.CHAR) {
+				// Cast Char to String
+				return new Node(Node.A2S, fac_n, null, type);
+			} else if (fac_n.type.kind == Struct.CHAR) {
+				return new Node(Node.C2S, fac_n, null, type);
+			} else
+				SemErr("Array must be of type CHAR to be casted to STRING!");
+
+		} else
+			SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to " + type.getKindName(type.kind));
+
+		return new Node(Node.UKN, null, null, null);
+
+	}
+	
+	//----------- Zuweisungskompatiblität --------- //
+	public boolean isCompatible(int des, int exp)
+	{
+		//INT = X
+		if(des == Struct.INT && exp == Struct.INT)
+			return true;
+		else if(des == Struct.INT && exp == Struct.FLOAT)
+			return true;
+		else if(des == Struct.INT && exp == Struct.DOUBLE)
+			return true;
+		else if(des == Struct.INT && exp == Struct.CHAR)
+			return true;
+			
+		//FLOAT = X
+		else if(des == Struct.FLOAT && exp == Struct.FLOAT)
+			return true;
+		else if(des == Struct.FLOAT && exp == Struct.INT)
+			return true;
+			else if(des == Struct.FLOAT && exp == Struct.CHAR)
+			return true;
+			
+		//DOUBLE = X
+		else if(des == Struct.DOUBLE && exp == Struct.DOUBLE)
+			return true;
+		else if(des == Struct.DOUBLE && exp == Struct.INT)
+			return true;
+		else if(des == Struct.DOUBLE && exp == Struct.FLOAT)
+			return true;
+		else if(des == Struct.DOUBLE && exp == Struct.CHAR)
+			return true;
+			
+		//CHAR = X
+		else if(des == Struct.CHAR && exp == Struct.CHAR)
+			return true;
+		else if(des == Struct.CHAR && exp == Struct.INT)
+			return true;
+		
+		//STRING = X
+		else if(des == Struct.STRING && exp == Struct.STRING)
+			return true;
+		else if(des == Struct.STRING && exp == Struct.CHAR)
+			return true;
+		
+		//BOOL = X
+		else if(des == Struct.BOOL && exp == Struct.BOOL)
+			return true;
+		
+		return false;
+	}
+	
+/*-------------------------------------------------------------------------*/
+
+CHARACTERS
+  letter    = 'A'..'Z' + 'a'..'z'.
+  digit     = '0'..'9'.
+  charCh    = ANY - '\r' - '\n' - '\t' - '\'' - '\\'.
+  stringCh	= ANY - '\r' - '\n' - '\t' - '\\' - '\"'.
+
+TOKENS
+  ident     = letter { letter | digit }.
+  intCon    = digit { digit }.
+  floatCon  = digit {digit} '.' {digit} ['E' ['+'|'-'] digit {digit}] 'f'.
+  doubleCon  = digit {digit} '.' {digit} ['E' ['+'|'-'] digit {digit}].
+  charCon   = '\'' ( charCh | '\\' ('r' | 'n' | 't' | '\'' | '\\' )) '\''.
+  stringCon	= '"' {stringCh | '\\' ('r' | 'n' | 't' | '\\' )} '"'.
+  
+  //--- token definitions for lookahead peeking
+  lpar      = "(".
+  rpar      = ")".
+  semicolon = ";".
+  assign    = '='.
+  eql       = "==".
+  neq       = "!=".
+  lss       = "<".
+  leq       = "<=".
+  gtr       = ">".
+  geq       = ">=".
+  bang      = "!".
+
+COMMENTS FROM "/*" TO "*/" NESTED
+COMMENTS FROM "//" TO '\n'
+
+IGNORE "\t\r\n"
+
+//-----------------------------------
+
+PRODUCTIONS
+
+CMM										
+=										(. tab = new Tab(this);
+										tab.openScope();   .)
+{ ConstDecl 
+| IF(isVarDecl()) VarDecl 
+| ProcDecl <out NodeList proc_nl>		(. 	currProc.ast = new Node(Node.STATSEQ,proc_nl.get(), null, null ); 
+											currProc.ast.line = proc_nl.head.line;
+											
+										if (debug[1]) Node.dump(currProc.ast,0);
+										.)
+}										
+										(. 
+										if (debug[0]) tab.dumpScope(tab.curScope.locals, 0); 
+										if(tab.find("Main") == Tab.noObj)
+											{SemErr("Main method not found!");}
+										.)
+										
+.
+//-----------------------------------
+ConstDecl								(. Struct type; .)
+=                                                                  
+"const" 
+Type <out type>
+ident									(. Obj obj = tab.insert(Obj.CON, t.val, type); .)
+"="(
+
+   intCon								(. obj.val = intVal(t.val);
+											if (!isCompatible(type.kind, Struct.INT))
+												SemErr("Incompatible type of initialization value!");
+										.)
+                                               
+ | floatCon									(. obj.fVal = floatVal(t.val);
+											if (!isCompatible(type.kind, Struct.FLOAT))
+												SemErr("Incompatible type of initialization value!");
+										.)
+ | doubleCon							(. obj.dVal = doubleVal(t.val);
+											if (!isCompatible(type.kind, Struct.DOUBLE))
+												SemErr("Incompatible type of initialization value!");
+										.)
+                                           
+                                               
+ | charCon								(. obj.cVal = charVal(t.val);
+											if (!isCompatible(type.kind, Struct.CHAR))
+												SemErr("Incompatible type of initialization value!");
+										.)
+                                               
+ | stringCon							(. obj.sVal = stringVal(t.val);
+											if (!isCompatible(type.kind, Struct.STRING))
+												SemErr("Incompatible type of initialization value!");
+										.)
+ | BoolExp <out boolean boolVal>		(. obj.bVal = boolVal;
+											if (!isCompatible(type.kind, Struct.BOOL))
+												SemErr("Incompatible type of initialization value!");
+										 .)
+
+ )
+ ";".                    
+//-----------------------------------
+VarDecl									(. Struct type; .)
+=
+Type <out type>
+ident									(. tab.insert(Obj.VAR, t.val, type); .)
+{"," 
+ident									(. tab.insert(Obj.VAR, t.val, type); .)
+} ";". 
+//-----------------------------------
+ProcDecl <out NodeList proc_nl>			(. Struct type = null; int num; Node stm_n; proc_nl = new NodeList(); .)
+=                                                                   
+(										
+Type <out type> 						(. 	if(!type.isPrimitive())
+											{
+												if(type.kind != Struct.STRING)
+												{
+													SemErr("Method return type must be a primitive or a string!");
+												}
+											}
+										.)
+| "void"								(. type = Tab.noType; .)
+)
+ident									(. currProc = tab.insert(Obj.PROC, t.val, type);
+										   tab.openScope(); 
+										.)                                      
+"(" [ 
+FormPars <out num>						(. currProc.nPars = num; .)
+] ")"
+"{"
+{ ConstDecl 
+| IF(isVarDecl()) VarDecl 
+| Statement	<out stm_n>					(. proc_nl.add(stm_n); .)	
+} 
+"}"										(. 
+											Node trap = new Node(Node.TRAP, null,null,Tab.noType);
+											trap.line = t.line;
+											proc_nl.add(trap);
+											
+											if(proc_nl.tail == null || proc_nl.head == null)
+												{SemErr("Invalid statement (maybe 'return' needs a value after it!)");}
+											else if(proc_nl.hasReturnStatement == false && currProc.type != Tab.noType)
+												{SemErr("Missing return statement!");}
+
+											currProc.locals = tab.curScope.locals; tab.closeScope();
+										.)
+										
+.
+//-----------------------------------
+FormPars <out int num>					(. Struct type; .)
+= 
+Type <out type> ident					(. num = 1; tab.insert(Obj.VAR, t.val, type);
+										if(!type.isPrimitive()&&type.kind != Struct.STRING)
+											{SemErr("Parameter must be a primitive or a String!");}
+										.)
+										
+{"," Type <out type> ident				(. num++; tab.insert(Obj.VAR, t.val, type);
+										if(!type.isPrimitive()&&type.kind != Struct.STRING)
+											{SemErr("Parameter must be a primitive or a String!");}
+										.)		
+}.
+//-----------------------------------
+Type <out Struct type>
+= 
+ident									(. Obj obj = tab.find(t.val);
+										if(obj.kind != Obj.TYPE)
+											{SemErr("Unknown type " + t.val + "!");}
+										 type = obj.type; 
+										.)
+[ "[" intCon							(. int len = intVal(t.val); 
+										   if(len <= 0) {SemErr("Lenght of array can't be less than 1!");}
+										   type = new Struct(Struct.ARR, len, type);
+										.)
+ "]" ].
+//-----------------------------------
+
+Statement <out Node stm_n>								(.  
+															NodeList act_nl; 
+															int line = -1; Node des_n, exp_n, con_n, stm_n1, stm_n2, stm_n3, stm_n4; stm_n = null;
+														.)			
+=
+( Designator <out des_n>								 
+														
+  ( "="													(. line = t.line; .)
+   Expr <out exp_n>								
+   														(.
+  															if(des_n.kind == Node.INDEX)
+															{
+																if(des_n.left.type.elemType.kind == Struct.STRING)
+																{
+																	SemErr("Designator array element can't be a string!");
+																}
+															}
+															else
+															{
+																if(des_n.obj.kind != Obj.VAR)
+																{
+																	SemErr("Designator must be a variable!");
+																}
+															}
+															
+															if(exp_n.type.kind != Struct.STRING && !exp_n.type.isPrimitive())
+															{
+																SemErr("Expression must be primitive or a string!");
+															}
+															else
+															if(!isCompatible(des_n.type.kind, exp_n.type.kind))
+															{
+																SemErr("Designator and expression aren't compatible!");
+															}
+  															
+  															
+  														stm_n = new Node(Node.ASSIGN, des_n, exp_n, Tab.noType);
+  														stm_n.line = line;
+  													.)
+ | 														(. line = la.line; .)
+ 
+  ActPars <out act_nl>									(.
+  															if(des_n.type != Tab.noType) SemErr("Designator must be void!");
+  															stm_n = new Node(Node.CALL, act_nl.get(), null, Tab.noType);
+  															stm_n.line = line;
+  															stm_n.obj = des_n.obj;  
+  														.)
+  ) ";"
+  
+|
+"if"													(. line = t.line; .)
+"(" 
+	Condition <out con_n>								
+")" 
+	Statement <out stm_n1>								(. 
+															stm_n = new Node(Node.IF, con_n, stm_n1, Tab.noType);
+															stm_n.line = line;
+														.) 
+["else" 
+	Statement <out stm_n2>								(.	stm_n = new Node(Node.IFELSE, stm_n, stm_n2, Tab.noType);
+															stm_n.line = line;
+														.)
+]
+
+|
+"while" 												(. line = t.line; .)
+"(" 
+	Condition <out con_n>								
+ ")" 
+ 	Statement <out stm_n3>								(. 
+ 															stm_n = new Node(Node.WHILE , con_n, stm_n3, Tab.noType);
+ 															stm_n.line = line;
+ 														.) 
+ 			
+|
+"for" 													(. line = t.line; .)
+"(" 
+	Statement <out Node ass_n>
+	
+	Condition <out con_n>	
+	";"
+	Statement <out Node op_n>							(.  if(ass_n.kind != Node.ASSIGN || ass_n.kind == Node.STATSEQ){SemErr("Invalid for loop! Check Initializer!");}
+															if(op_n.kind == Node.STATSEQ){SemErr("Operator can't be a block!");}
+															Node head = new Node(Node.FORHEAD, ass_n, con_n, Tab.noType);
+															head.line = line;
+														.)
+ ")" 
+ 	Statement <out Node for_stat_n>						(. 
+ 															Node f = for_stat_n;
+ 															
+ 															while(true)
+															{
+																if(f.next == null)
+																{
+																	f.next = op_n;
+																	break;
+																}
+																
+																f = f.next;
+																
+																
+															}
+															
+															
+															 															
+ 															stm_n = new Node(Node.FOR , head, for_stat_n, Tab.noType);
+ 															stm_n.line = line;
+ 														.) 
+ 			
+|
+"print"													(. line = t.line; .)
+"("
+Expr <out exp_n>										(.
+															stm_n = new Node(Node.PRINT, exp_n, null, Tab.noType);
+															stm_n.line = line;
+														.)
+")" ";"
+
+
+
+|
+"{"														(. NodeList block = new NodeList(); line = t.line; .)
+{
+Statement <out stm_n4>									(. block.add(stm_n4); .)
+}														(. if(block.entries != 0)line = block.head.line; .)
+"}"														(. stm_n = new Node(Node.STATSEQ, block.get(), null, Tab.noType);
+														   stm_n.line = line;
+														.)
+										
+|
+"return"												(. line = t.line; .)
+Expr <out exp_n> ";"								(. 
+														
+													
+														
+														if(currProc.type.kind == Struct.NONE)
+														{
+															SemErr("Only non-void functions can return values!");
+														
+														}if(exp_n == null)
+														{
+															SemErr("'return' needs a value!");
+														}
+														else
+														
+														if(exp_n.type.kind != currProc.type.kind)
+														{
+															SemErr("Return value must be of the same type as the function!");
+														}else
+														
+														stm_n = new Node(Node.RETURN, exp_n, null, Tab.noType); 
+														stm_n.line = line;
+													.) 					
+| ";"
+).
+//-------------------------------------------------------------------------
+ActPars	<out NodeList act_nl>			(. Node exp_n; act_nl = new NodeList();.)
+= 
+"(" [Expr <out exp_n>					(. act_nl.add(exp_n); .)
+{"," Expr <out exp_n>					(. act_nl.add(exp_n); .)
+}] ")".
+//-------------------------------------------------------------------------
+Condition <out Node con_n>				(. Node conTerm_n1, conTerm_n2; con_n = null; .)
+= 
+	CondTerm <out conTerm_n1>			(. con_n = conTerm_n1; .)
+{
+	"||"
+	CondTerm <out conTerm_n2>			(. con_n = new Node(Node.OR, conTerm_n1, conTerm_n2, Tab.boolType); 
+										conTerm_n1 = con_n;
+										.)
+}.
+//-------------------------------------------------------------------------
+CondTerm <out Node conTerm_n>			(. Node conFac_n1, conFac_n2; conTerm_n = null; .)
+= 
+CondFact <out conFac_n1>				(. conTerm_n = conFac_n1; .)
+{
+	"&&"
+	CondFact <out conFac_n2>			(. conTerm_n = new Node(Node.AND, conFac_n1, conFac_n2, Tab.boolType); 
+											conFac_n1 = conTerm_n;
+										.)
+}.
+//-------------------------------------------------------------------------
+CondFact <out Node conFac_n>			(. Node exp_n1, exp_n2, con_n; int operator; conFac_n = null;.)
+=
+(
+	IF (isExpr()) 
+	Expr <out exp_n1>
+  	Relop <out operator>
+ 	Expr <out exp_n2>					
+ 										(.
+ 											if(exp_n1.type.isPrimitive() == false && exp_n2.type.isPrimitive() == false )
+ 											{
+ 												if(exp_n1.type.kind != Struct.STRING && exp_n2.type.kind != Struct.STRING)
+												{SemErr("Both terms must be a primitive or string!");}
+ 											}
+ 											
+ 											conFac_n = new Node(operator, exp_n1, exp_n2, Tab.boolType);
+ 										.)
+)
+
+|
+"!"
+"("	
+	Condition <out con_n>				(. conFac_n = new Node(Node.NOT, con_n, null, Tab.boolType ); .)
+")"					
+|
+"("
+	Condition <out con_n>				(. conFac_n = con_n; .)
+")"
+.
+//------------------------------------------------------------------------
+BoolExp <out boolean boolVal>			(. boolVal = false; .)
+=
+"true"									(. boolVal = true; .)
+|
+"false"									(. boolVal = false; .)
+.
+//-------------------------------------------------------------------------
+Relop <out int operator>				(. operator = Node.UKN; .)
+= 
+	"=="								(. operator = Node.EQL; .)
+| 	"!="								(. operator = Node.NEQ; .)
+| 	">"									(. operator = Node.GTR; .)
+|	">="								(. operator = Node.GEQ; .)
+| 	"<"									(. operator = Node.LSS; .)
+|	"<="								(. operator = Node.LEQ; .)
+.
+//-------------------------------------------------------------------------
+Expr <out Node exp_n>					(. Node trm_n1, trm_n2; int operator; .)
+= 
+Term <out trm_n1> 						(. exp_n = trm_n1; .)
+										 
+{Addop <out operator>				
+ Term <out trm_n2>						(. 
+ 
+										if(	trm_n1.type.isPrimitive() == true && trm_n2.type.isPrimitive() == true)
+										{	
+												exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+												trm_n1 = exp_n;
+													
+										}else
+											if(trm_n1.type.kind == Struct.STRING && trm_n2.type.kind == Struct.STRING)
+											{
+												exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+												trm_n1 = exp_n;
+											}else
+												SemErr("Both terms must be a primitive or strings!");
+											
+										
+											
+										.)
+ }.
+//-------------------------------------------------------------------------
+Term <out Node trm_n>					(. Node fac_n1, fac_n2; int operator; .)				
+= 
+Factor <out fac_n1> 					(. trm_n = fac_n1; .)	
+{
+Mulop  <out operator>					
+Factor <out fac_n2>						(.
+
+										if((!fac_n1.type.isPrimitive() && !fac_n2.type.isPrimitive()))
+											if((fac_n1.type.kind != Struct.STRING && fac_n2.type.kind != Struct.STRING))
+											{SemErr("Both factors must be a primitive or strings!");}
+										
+											trm_n = new Node(operator, fac_n1, fac_n2, fac_n1.type);
+											fac_n1 = trm_n;
+										.)
+ }.
+//-------------------------------------------------------------------------
+Factor <out Node fac_n>					(. Struct type; Node des_n,exp_n; NodeList act_nl; fac_n = null; .)
+=
+(
+Designator <out des_n>					(. fac_n = des_n; int line = t.line; .)
+
+[
+ActPars	<out act_nl>			
+										(.
+										if(des_n.kind != Node.IDENT){SemErr("Designator must have no structure!");}
+										else
+										{
+											if(des_n.obj.kind != Obj.PROC){SemErr("Designator must be of kind PROC but " + des_n.obj.name +" is" + des_n.obj.getKindName(des_n.obj.kind) + "!");}
+											else if(des_n.obj.type.kind == Struct.NONE){SemErr("Designator can't be of type void!");}
+												else 
+													
+													
+														if(act_nl.entries != des_n.obj.nPars)
+														{
+															SemErr("Parameter count mismatch!");
+														}else
+														{
+															fac_n = new Node(Node.CALL, act_nl.get(), null, des_n.type);
+															fac_n.line = line;
+														}
+													
+																							
+											fac_n.obj = des_n.obj; //To know the method name
+											
+										}.)
+					
+] 
+| intCon								(. fac_n = new Node(intVal(t.val)); .)
+| floatCon								(. fac_n = new Node(floatVal(t.val)); .)
+| doubleCon								(. fac_n = new Node(doubleVal(t.val)); .)
+| BoolExp <out boolean boolVal>			(. fac_n = new Node(boolVal); .)
+| charCon								(. fac_n = new Node(charVal(t.val)); .)
+| stringCon								(. fac_n = new Node(stringVal(t.val)); .)
+										
+| "read" "(" ")"						(. 	fac_n = new Node(Node.READ, null, null, Tab.stringType); .)
+| "lenght" "(" Expr <out exp_n> ")"		(. 
+											fac_n = new Node(Node.LENGHT, exp_n, null, Tab.intType); 
+											
+											if(exp_n.type.kind != Struct.STRING)
+											{
+												SemErr("lenght() parameter must be a string!");
+											}
+										.)
+
+| "-" Factor <out fac_n>				(. if(fac_n.type.kind != Struct.INT && fac_n.type.kind != Struct.FLOAT)
+											{SemErr("Factor must be INT or FLOAT!");}
+
+										fac_n = new Node(Node.MINUS, fac_n, null, fac_n.type); .) 
+
+| IF (isCast())
+
+  "(" Type <out type> ")" Factor <out fac_n>	(.
+   
+  												fac_n = cast(type, fac_n);
+  												.)
+  
+  
+  
+  
+  
+| "(" Expr <out exp_n> ")"				(. fac_n = exp_n; .)
+).
+//-------------------------------------------------------------------------
+Designator <out Node des_n>				(. Node exp_n; .)
+= 
+ident									(. Obj o = tab.find(t.val);
+									 	des_n = new Node(o); .)
+									
+										
+											 
+								
+( "["                               		
+  Expr <out exp_n>                   	(. Struct type = null;
+  											if(o.type.kind == Struct.STRING) {type =  Tab.charType;}
+  											else if (o.type.kind == Struct.ARR) {type = o.type.elemType;}
+  											else {SemErr("Invalid Designator Type (must be string or array)!");}
+  
+  										if(exp_n.type.kind != Struct.INT) {SemErr("Index must be of type INT!");}
+  										
+ 										des_n = new Node(Node.INDEX, des_n, exp_n, type ); .)
+  "]"
+|                                  
+).						
+//-------------------------------------------------------------------------
+Addop <out int operator>				(. operator = Node.UKN; .)
+=
+	"+"									(. operator = Node.PLUS; .)
+| 	"-"									(. operator = Node.MINUS; .)
+.
+//-------------------------------------------------------------------------
+Mulop <out int operator>				(. operator = Node.UKN; .)
+=
+	"*"									(. operator = Node.TIMES; .)
+| 	"/"									(. operator = Node.DIV; .)
+| 	"%"									(. operator = Node.REM; .)
+.
+
+END CMM.

@@ -1,0 +1,58 @@
+int ggt(int x, int y) {
+	int rest;
+	rest = x % y;
+	while (rest != 0) {
+		x = y; y = rest;
+		rest = x % y;
+	}
+	return y;
+}
+
+int readInt() {
+	int res;
+	res = 0;
+	char ch;
+	ch = read();
+	while (ch > 0 && ch <= ' ') 
+		ch = read();
+	while (ch >= '0' && ch <= '9') {
+		res = 10 * res + ch;
+		ch = read();
+	}
+	return res;
+}
+
+void printString(string s) {
+  int i;
+  i = 0;
+  while (s[i] != 0) {
+    print(s[i]);
+    i = i + 1;
+  }
+}
+
+void printInt(int val) {
+  int i;
+  char[10] a;
+  a[0] = (char)(val % 10);
+  val = val / 10;
+  i = 1;
+  while (val != 0) {
+    a[i] = (char)(val % 10);
+    val = val / 10;
+    i = i + 1;
+  }
+  while (i > 0) {
+    i = i - 1;
+    print(a[i]);
+  }
+}
+
+void Main() {
+  int x, y, z;
+  x = readInt(); 
+  y = readInt();
+  z = ggt(x, y);
+  printString("result = ");
+  printInt(z);
+}

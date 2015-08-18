@@ -1,0 +1,183 @@
+void Main()
+{
+	int i;
+	i = 0;
+	string d;
+	
+	
+	
+	if(i < 1)
+	{
+		i = lenght("ss");
+	}else
+	{
+		print(2);
+	}
+}
+
+/*
+
+int globalINT;
+
+//FormPars Test:
+void vc()
+{
+	int i;
+	i = 2;
+}
+
+
+int in(float x, int y)
+{
+ return 3;
+}
+
+
+int GCD (int x, int y) {
+	int rest;
+	rest = x % y;
+	while (rest != 0) {
+		x = y;
+		y = rest;
+		rest = x % y;
+	}
+	return y;
+}
+
+
+
+int globint;
+
+void Main()
+{
+	
+	
+	//Constant Decleration
+	const int ci = 1;
+	const float cf = 1.1;
+	const char cc = 'e';
+	const string cs = "Xer0";
+	
+	//Variable Decleration
+	int i;
+	float f;
+	char c;
+	string s;
+	
+	//Variable Arrays
+	int[1] ai;
+	float[1] af;
+	char[1] ac;
+	string[1] as;
+	
+	ac[2] = '2';
+	
+	
+	
+	//Factor / Expression Test
+	i = 1 * ci + (2 - 3);
+	f = 4 * cf + (5 - 6);
+	c = 'v';
+	s = "zwei" + cs + ("zwei" - "vier");
+	
+	//Cast Test:
+	i = (int) (f + 0.1);
+	f = (float) (i + 1);
+	c = (char) (i + 2);
+	i = (int) (c + '2');
+	
+	s = (string) (ac);
+	
+	
+	//Conditions
+	if(i == i && i < f || !(s != "x") && i <= 4 || i + 1 >= 4)
+	{
+		print("2");
+	}
+	
+
+	
+	
+	if(1 == 1)
+	{
+		print("IF - 1 == 1");
+	}else
+	{
+			print("ELSE - 1 != 1");
+	
+	}
+	
+	
+	float fff;
+	fff = 222;
+	
+	
+	
+	int rest,y,x;
+	x = 10;
+	y = 8;
+	rest = x % y;
+	while (rest != 0) {
+		x = y;
+		y = rest;
+	}
+	
+	
+	
+
+	int ifd;
+	ifd = in(4,44);
+	
+	{
+	 i = in(1,2) + 2;
+	}
+	
+	
+	
+	int v;
+	
+	v = in(2.2,3);
+	
+
+	
+ 	i = in(2,2+4 * x);
+		
+	vc();
+	
+	
+	int i;
+	
+	i = GCD(10,22);
+	
+		
+		
+		int v ;
+		v = 3;
+
+		
+}
+
+
+int add(int a, int b)
+{
+	int result;
+	result = a + b;
+	return result;
+}
+
+void Main()
+{
+	const int a = 2;
+	const int b = 3;
+	int res;
+	
+	res = add(4,5);
+	
+	res = 4;
+	
+}
+
+
+
+
+*/
