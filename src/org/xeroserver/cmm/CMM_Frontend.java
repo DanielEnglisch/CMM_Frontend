@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.xeroserver.AstVisualizer.AstVisualizer;
 
+import com.oracle.truffle.cmm.parser.Node;
 import com.oracle.truffle.cmm.parser.Parser;
 import com.oracle.truffle.cmm.parser.Scanner;
 
@@ -64,8 +65,16 @@ public class CMM_Frontend {
 		new AstVisualizer(parser.tab.find(method).ast, method);
 	}
 		
+	public Node getMainNode()
+	{
+		return parser.tab.find("Main").ast;
+	}
 
 	public static void main(String[] args) {
+		
+		java.util.Scanner sc = new java.util.Scanner(System.in);
+		
+		System.out.println("CHAR: " + sc.findInLine(".").charAt(0));
 
 		CMM_Frontend front = new CMM_Frontend(new File(args[0]));
 		front.setDebugmode(true);

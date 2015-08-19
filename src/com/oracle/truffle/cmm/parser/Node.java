@@ -67,8 +67,10 @@ public final class Node {
 			OR = 31, // ||
 			AND = 32, // &&
 			READ = 33, // read();
+			READLN = 47,
 			UKN = 34, // Unknown
 			PRINT = 35, // print();
+			PRINTLN = 48,
 			LENGHT = 36; //lenght(string);
 	
 
@@ -209,7 +211,7 @@ public final class Node {
 	public static String[] name = { "STATSEQ", "ASSIGN", "CALL", "IF", "IFELSE", "WHILE", "RETURN", "TRAP", "IDENT",
 			"INTCON", "FLOATCON", "CHARCON", "STRINGCON", "INDEX", "PLUS", "MINUS", "MUL", "DIV", "REM", "I2F", "F2I",
 			"I2C", "C2I", "A2S", "EQL", "NEQ", "LSS", "LEQ", "GTR", "GEQ", "NOT", "OR", "AND", "READ", "?Unknown?" ,
-			"PRINT", "LENGHT", "DOUBLE" , "D2I", "BOOLCON", "FORHEAD", "FOR", "C2F", "I2D" , "F2D" , "C2D", "C2S"};
+			"PRINT", "LENGHT", "DOUBLE" , "D2I", "BOOLCON", "FORHEAD", "FOR", "C2F", "I2D" , "F2D" , "C2D", "C2S", "READLN", "PRINTLN"};
 
 	private static String[] typ = { "None", "Int", "Float", "Char", "Bool", "String", "Arr", "Double" };
 

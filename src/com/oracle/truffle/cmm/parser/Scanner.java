@@ -253,8 +253,8 @@ class StartStates {
 public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
-	static final int maxT = 42;
-	static final int noSym = 42;
+	static final int maxT = 44;
+	static final int noSym = 44;
 
 
 	public Buffer buffer; // scanner buffer
@@ -311,11 +311,13 @@ public class Scanner {
 		literals.put("while", new Integer(27));
 		literals.put("for", new Integer(28));
 		literals.put("print", new Integer(29));
-		literals.put("return", new Integer(30));
-		literals.put("true", new Integer(33));
-		literals.put("false", new Integer(34));
-		literals.put("read", new Integer(35));
-		literals.put("lenght", new Integer(36));
+		literals.put("printLine", new Integer(30));
+		literals.put("return", new Integer(31));
+		literals.put("true", new Integer(34));
+		literals.put("false", new Integer(35));
+		literals.put("read", new Integer(36));
+		literals.put("readLine", new Integer(37));
+		literals.put("lenght", new Integer(38));
 
 	}
 	
@@ -547,22 +549,22 @@ public class Scanner {
 					if (ch == '|') {AddCh(); state = 32; break;}
 					else {state = 0; break;}
 				case 32:
-					{t.kind = 31; break loop;}
+					{t.kind = 32; break loop;}
 				case 33:
 					if (ch == '&') {AddCh(); state = 34; break;}
 					else {state = 0; break;}
 				case 34:
-					{t.kind = 32; break loop;}
+					{t.kind = 33; break loop;}
 				case 35:
-					{t.kind = 37; break loop;}
-				case 36:
-					{t.kind = 38; break loop;}
-				case 37:
 					{t.kind = 39; break loop;}
-				case 38:
+				case 36:
 					{t.kind = 40; break loop;}
-				case 39:
+				case 37:
 					{t.kind = 41; break loop;}
+				case 38:
+					{t.kind = 42; break loop;}
+				case 39:
+					{t.kind = 43; break loop;}
 
 			}
 		}

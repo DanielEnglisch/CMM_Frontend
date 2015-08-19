@@ -480,6 +480,14 @@ Expr <out exp_n>										(.
 															stm_n.line = line;
 														.)
 ")" ";"
+|
+"printLine"												(. line = t.line; .)
+"("
+Expr <out exp_n>										(.
+															stm_n = new Node(Node.PRINTLN, exp_n, null, Tab.noType);
+															stm_n.line = line;
+														.)
+")" ";"
 
 
 
@@ -670,7 +678,8 @@ ActPars	<out act_nl>
 | charCon								(. fac_n = new Node(charVal(t.val)); .)
 | stringCon								(. fac_n = new Node(stringVal(t.val)); .)
 										
-| "read" "(" ")"						(. 	fac_n = new Node(Node.READ, null, null, Tab.stringType); .)
+| "read" "(" ")"						(. 	fac_n = new Node(Node.READ, null, null, Tab.charType); .)
+| "readLine" "(" ")"					(. 	fac_n = new Node(Node.READLN, null, null, Tab.stringType); .)
 | "lenght" "(" Expr <out exp_n> ")"		(. 
 											fac_n = new Node(Node.LENGHT, exp_n, null, Tab.intType); 
 											
