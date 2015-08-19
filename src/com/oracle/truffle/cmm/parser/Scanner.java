@@ -317,7 +317,7 @@ public class Scanner {
 		literals.put("false", new Integer(35));
 		literals.put("read", new Integer(36));
 		literals.put("readLine", new Integer(37));
-		literals.put("lenght", new Integer(38));
+		literals.put("length", new Integer(38));
 
 	}
 	

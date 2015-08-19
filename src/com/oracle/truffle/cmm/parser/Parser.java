@@ -445,7 +445,7 @@ public class Parser {
 			Get();
 			Expect(2);
 			int len = intVal(t.val); 
-			if(len <= 0) {SemErr("Lenght of array can't be less than 1!");}
+			if(len <= 0) {SemErr("Length of array can't be less than 1!");}
 			type = new Struct(Struct.ARR, len, type);
 			
 			Expect(24);
@@ -938,7 +938,7 @@ public class Parser {
 			Expect(7);
 			exp_n = Expr();
 			Expect(8);
-			fac_n = new Node(Node.LENGHT, exp_n, null, Tab.intType); 
+			fac_n = new Node(Node.LENGTH, exp_n, null, Tab.intType); 
 			
 			if(exp_n.type.kind != Struct.STRING)
 			{
@@ -1070,7 +1070,7 @@ class Errors {
 			case 35: s = "\"false\" expected"; break;
 			case 36: s = "\"read\" expected"; break;
 			case 37: s = "\"readLine\" expected"; break;
-			case 38: s = "\"lenght\" expected"; break;
+			case 38: s = "\"length\" expected"; break;
 			case 39: s = "\"-\" expected"; break;
 			case 40: s = "\"+\" expected"; break;
 			case 41: s = "\"*\" expected"; break;

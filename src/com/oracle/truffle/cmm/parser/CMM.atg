@@ -357,7 +357,7 @@ ident									(. Obj obj = tab.find(t.val);
 										 type = obj.type; 
 										.)
 [ "[" intCon							(. int len = intVal(t.val); 
-										   if(len <= 0) {SemErr("Lenght of array can't be less than 1!");}
+										   if(len <= 0) {SemErr("Length of array can't be less than 1!");}
 										   type = new Struct(Struct.ARR, len, type);
 										.)
  "]" ].
@@ -680,8 +680,8 @@ ActPars	<out act_nl>
 										
 | "read" "(" ")"						(. 	fac_n = new Node(Node.READ, null, null, Tab.charType); .)
 | "readLine" "(" ")"					(. 	fac_n = new Node(Node.READLN, null, null, Tab.stringType); .)
-| "lenght" "(" Expr <out exp_n> ")"		(. 
-											fac_n = new Node(Node.LENGHT, exp_n, null, Tab.intType); 
+| "length" "(" Expr <out exp_n> ")"		(. 
+											fac_n = new Node(Node.LENGTH, exp_n, null, Tab.intType); 
 											
 											if(exp_n.type.kind != Struct.STRING)
 											{
