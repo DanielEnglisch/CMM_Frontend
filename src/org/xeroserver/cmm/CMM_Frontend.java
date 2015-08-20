@@ -50,6 +50,11 @@ public class CMM_Frontend {
 		return parser.getErrorCount();
 	}
 	
+	public Parser getParser()
+	{
+		return parser;
+	}
+	
 	public HashMap<Integer, String> getErrorList()
 	{
 		return parser.getErrorList();
@@ -72,9 +77,7 @@ public class CMM_Frontend {
 
 	public static void main(String[] args) {
 		
-		java.util.Scanner sc = new java.util.Scanner(System.in);
 		
-		System.out.println("CHAR: " + sc.findInLine(".").charAt(0));
 
 		CMM_Frontend front = new CMM_Frontend(new File(args[0]));
 		front.setDebugmode(true);
