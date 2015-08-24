@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -43,8 +42,8 @@ public class Screen extends JFrame {
 
 		};
 
-		panel.setBorder(BorderFactory.createLineBorder(Color.red));
-		panel.setPreferredSize(new Dimension(50000, 20000));
+		//panel.setBorder(BorderFactory.createLineBorder(Color.red));
+		panel.setPreferredSize(new Dimension(5000, 2000));
 		panel.setLayout(null);
 
 		final JScrollPane scroll = new JScrollPane(panel);
