@@ -20,7 +20,7 @@ public class Obj {
 	public char cVal; // CON: char value
 	public String sVal; // CON: String value
 	public double dVal; // CON: Double Value
-	public boolean bVal; //CON: Boolean Value
+	public boolean bVal; // CON: Boolean Value
 
 	public int level; // VAR: declaration level
 

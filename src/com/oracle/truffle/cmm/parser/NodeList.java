@@ -7,18 +7,17 @@ NodeList   Builds lists of AST nodes
 
 public class NodeList {
 	Node head, tail;
-	
+
 	int entries;
 	boolean hasReturnStatement = false;
 
 	// Append x to the list
 	public void add(Node x) {
-		
-		
-		if(x.kind == Node.RETURN){
+
+		if (x.kind == Node.RETURN) {
 			hasReturnStatement = true;
 		}
-		
+
 		if (x != null) {
 			if (head == null)
 				head = x;

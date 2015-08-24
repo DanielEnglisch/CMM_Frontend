@@ -42,7 +42,7 @@ public class Screen extends JFrame {
 
 		};
 
-		//panel.setBorder(BorderFactory.createLineBorder(Color.red));
+		// panel.setBorder(BorderFactory.createLineBorder(Color.red));
 		panel.setPreferredSize(new Dimension(5000, 2000));
 		panel.setLayout(null);
 

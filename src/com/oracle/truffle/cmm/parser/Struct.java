@@ -50,7 +50,7 @@ public class Struct {
 			return "ARRAY";
 		case 7:
 			return "DOUBLE";
-			
+
 		}
 
 		return "ID:" + kindID;

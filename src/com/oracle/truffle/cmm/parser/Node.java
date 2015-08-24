@@ -11,7 +11,7 @@ a part of an expression have a type.
 
 public final class Node {
 
-	public static final int // node kinds 
+	public static final int // node kinds
 	// ----------- statements
 	STATSEQ = 0, // statement sequence
 			ASSIGN = 1, // assignment
@@ -19,9 +19,7 @@ public final class Node {
 			IF = 3, // if statement without else branch
 			IFELSE = 4, // if statement with else branch
 			WHILE = 5, // while statement
-			FORHEAD = 40,
-			FOR = 41,
-			RETURN = 6, // return statement
+			FORHEAD = 40, FOR = 41, RETURN = 6, // return statement
 			TRAP = 7, // trap if a function reaches its end without a return
 			// ------------ leaf expressions
 			IDENT = 8, // identifier
@@ -29,8 +27,7 @@ public final class Node {
 			FLOATCON = 10, // float constant
 			DOUBLECON = 37, // double constant
 			CHARCON = 11, // char constant
-			STRINGCON = 12,
-			BOOLCON = 39,
+			STRINGCON = 12, BOOLCON = 39,
 			// ------------ designators
 			INDEX = 13, // array element (a[i])
 			// ------------ expressions
@@ -40,23 +37,17 @@ public final class Node {
 			DIV = 17, // /
 			REM = 18, // %
 			// Cast:
-			F2I = 20,
-			D2I = 38,
-			C2I = 22, 
+			F2I = 20, D2I = 38, C2I = 22,
 
-			I2F = 19,
-			C2F = 42,
-			
-			I2D = 43,
-			F2D = 44,
-			C2D = 45,
+	I2F = 19, C2F = 42,
 
-			I2C = 21,
-			
-			A2S = 23,
-			C2S = 46,
+	I2D = 43, F2D = 44, C2D = 45,
 
-			// ------------ conditionals
+	I2C = 21,
+
+	A2S = 23, C2S = 46,
+
+	// ------------ conditionals
 			EQL = 24, // ==
 			NEQ = 25, // !=
 			LSS = 26, // <
@@ -67,12 +58,9 @@ public final class Node {
 			OR = 31, // ||
 			AND = 32, // &&
 			READ = 33, // read();
-			READLN = 47,
-			UKN = 34, // Unknown
+			READLN = 47, UKN = 34, // Unknown
 			PRINT = 35, // print();
-			PRINTLN = 48,
-			LENGTH = 36; //lenght(string);
-	
+			PRINTLN = 48, LENGTH = 36; // lenght(string);
 
 	public String getKindName(int kindID) {
 		switch (kindID) {
@@ -107,7 +95,6 @@ public final class Node {
 	public String sVal; // value of a STRINGCON
 	public double dVal;
 	public boolean bVal;
-
 
 	// for expression nodes
 	public Node(int kind, Node left, Node right, Struct type) {
@@ -148,13 +135,13 @@ public final class Node {
 		this.type = Tab.doubleType;
 		this.dVal = dValue;
 	}
-	
+
 	public Node(boolean bValue) {
 		this.kind = BOOLCON;
 		this.type = Tab.boolType;
 		this.bVal = bValue;
 	}
-	
+
 	public Node(char ch) {
 		this.kind = CHARCON;
 		this.type = Tab.charType;
@@ -173,35 +160,34 @@ public final class Node {
 		this.val = val;
 	}
 
-	//---------------- conversion of strings to constants ----------------//
+	// ---------------- conversion of strings to constants ----------------//
 
-		// Convert a digit string into an int
-		public int intVal(String s) {
-			return Integer.parseInt(s);
-		}
+	// Convert a digit string into an int
+	public int intVal(String s) {
+		return Integer.parseInt(s);
+	}
 
-		// Convert a string representation of a float constant into a float value
-		public float floatVal(String s) {
-			return Float.parseFloat(s);
-		}
+	// Convert a string representation of a float constant into a float value
+	public float floatVal(String s) {
+		return Float.parseFloat(s);
+	}
 
-		
-		public double doubleVal(String s) {
-			return Double.parseDouble(s);
-		}
-		
-		public boolean boolVal(String s) {
-			return Boolean.parseBoolean(s);
-		}
-		
-		public char charVal(String s) {
-			return s.replaceAll("\'", "").charAt(0);
-		}
-		
-		public String stringVal(String s) {
-			String res = s.substring(1);
-			return res.substring(0, res.length() - 1);
-		}
+	public double doubleVal(String s) {
+		return Double.parseDouble(s);
+	}
+
+	public boolean boolVal(String s) {
+		return Boolean.parseBoolean(s);
+	}
+
+	public char charVal(String s) {
+		return s.replaceAll("\'", "").charAt(0);
+	}
+
+	public String stringVal(String s) {
+		String res = s.substring(1);
+		return res.substring(0, res.length() - 1);
+	}
 
 	/*-------------------------------------------------------------------------*/
 
@@ -210,12 +196,12 @@ public final class Node {
 
 	public static String[] name = { "STATSEQ", "ASSIGN", "CALL", "IF", "IFELSE", "WHILE", "RETURN", "TRAP", "IDENT",
 			"INTCON", "FLOATCON", "CHARCON", "STRINGCON", "INDEX", "PLUS", "MINUS", "MUL", "DIV", "REM", "I2F", "F2I",
-			"I2C", "C2I", "A2S", "EQL", "NEQ", "LSS", "LEQ", "GTR", "GEQ", "NOT", "OR", "AND", "READ", "?Unknown?" ,
-			"PRINT", "LENGTH", "DOUBLE" , "D2I", "BOOLCON", "FORHEAD", "FOR", "C2F", "I2D" , "F2D" , "C2D", "C2S", "READLN", "PRINTLN"};
+			"I2C", "C2I", "A2S", "EQL", "NEQ", "LSS", "LEQ", "GTR", "GEQ", "NOT", "OR", "AND", "READ", "?Unknown?",
+			"PRINT", "LENGTH", "DOUBLE", "D2I", "BOOLCON", "FORHEAD", "FOR", "C2F", "I2D", "F2D", "C2D", "C2S",
+			"READLN", "PRINTLN" };
 
 	private static String[] typ = { "None", "Int", "Float", "Char", "Bool", "String", "Arr", "Double" };
 
-	
 	public static void dump(Node x, int indent) {
 		for (int i = 0; i < indent; i++)
 			System.out.print("  ");

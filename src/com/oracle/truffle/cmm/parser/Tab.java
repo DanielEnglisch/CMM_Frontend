@@ -30,11 +30,11 @@ public class Tab {
 	public static Struct doubleType;
 
 	public static Struct noType;
-	
+
 	public static Obj noObj; // predefined objects
 
 	private Parser parser; // for error messages
-	
+
 	// ------------------ scope management ---------------------
 
 	public void openScope() {
@@ -56,13 +56,12 @@ public class Tab {
 
 	public Obj insert(int kind, String name, Struct type) {
 
-		int x  = 0;
-		
-		for(;x==2; )
-		{
+		int x = 0;
+
+		for (; x == 2;) {
 			x++;
 		}
-		
+
 		Obj obj = new Obj(kind, name, type);
 
 		if (kind == Obj.VAR) {
@@ -98,18 +97,17 @@ public class Tab {
 			}
 
 		}
-		
-		if(!name.equals("Main"))
+
+		if (!name.equals("Main"))
 			parser.SemErr("Undeclared Object: " + name);
-		
+
 		return noObj;
 	}
-	
-	public ArrayList<Node> getPROCTrees()
-	{
-		
+
+	public ArrayList<Node> getPROCTrees() {
+
 		ArrayList<Node> nodes = new ArrayList<Node>();
-		
+
 		for (Scope s = curScope; s != null; s = s.outer) {
 
 			for (Obj o = s.locals; o != null; o = o.next) {
@@ -120,15 +118,14 @@ public class Tab {
 			}
 
 		}
-		
+
 		return nodes;
 	}
-	
-	public ArrayList<Obj> getVars()
-	{
-		
+
+	public ArrayList<Obj> getVars() {
+
 		ArrayList<Obj> vars = new ArrayList<Obj>();
-		
+
 		for (Scope s = curScope; s != null; s = s.outer) {
 
 			for (Obj o = s.locals; o != null; o = o.next) {
@@ -139,15 +136,14 @@ public class Tab {
 			}
 
 		}
-		
+
 		return vars;
 	}
 
-	public ArrayList<String> getProcNames()
-	{
-		
+	public ArrayList<String> getProcNames() {
+
 		ArrayList<String> names = new ArrayList<String>();
-		
+
 		for (Scope s = curScope; s != null; s = s.outer) {
 
 			for (Obj o = s.locals; o != null; o = o.next) {
@@ -158,15 +154,14 @@ public class Tab {
 			}
 
 		}
-		
+
 		return names;
 	}
-	
-	public ArrayList<Obj> getConsts()
-	{
-		
+
+	public ArrayList<Obj> getConsts() {
+
 		ArrayList<Obj> consts = new ArrayList<Obj>();
-		
+
 		for (Scope s = curScope; s != null; s = s.outer) {
 
 			for (Obj o = s.locals; o != null; o = o.next) {
@@ -177,7 +172,7 @@ public class Tab {
 			}
 
 		}
-		
+
 		return consts;
 	}
 
@@ -288,7 +283,6 @@ public class Tab {
 		insert(Obj.TYPE, "char", charType);
 		insert(Obj.TYPE, "string", stringType);
 		insert(Obj.TYPE, "bool", boolType);
-
 
 	}
 }

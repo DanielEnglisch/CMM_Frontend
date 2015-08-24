@@ -31,9 +31,10 @@ public class NodeIterator {
 
 		// Arrange Anchors (Spacing)
 		arrange();
-		
-			//Collision Count (DEBUG)
-			//System.out.println(getCollisionCount() + " collisions between nodes!");
+
+		// Collision Count (DEBUG)
+		// System.out.println(getCollisionCount() + " collisions between
+		// nodes!");
 
 		// Connect Nodes with lines
 		drawLines();
@@ -44,241 +45,188 @@ public class NodeIterator {
 	}
 
 	public void arrange() {
-						
-		int listSpace =  -60;
+
+		int listSpace = -60;
 		int branchSpace = -20;
 		int ySpace = 0;
-		
+
 		ArrayList<gNode> listElements = new ArrayList<gNode>();
-				
-		
-		//System.out.println("Arranging " + gnodes.size() + " nodes...");
-		
-		
-		for(gNode gn: gnodes)
-		{
-			if(gn.listelement && !gn.name.equals("STATSEQ"))
-			{
+
+		// System.out.println("Arranging " + gnodes.size() + " nodes...");
+
+		for (gNode gn : gnodes) {
+			if (gn.listelement && !gn.name.equals("STATSEQ")) {
 				listElements.add(gn);
-			}
-			else
-			{
-				if(gn.name.equals("STATSEQ"))
-				{
-					if(gn.parent != null)
-					{
-						int overlapp =getRightest(gn.parent).x - getLeftest(gn).x;
-						gn.setAnchorX(gn.getAnchorX() + overlapp + listSpace *-5);
+			} else {
+				if (gn.name.equals("STATSEQ")) {
+					if (gn.parent != null) {
+						int overlapp = getRightest(gn.parent).x - getLeftest(gn).x;
+						gn.setAnchorX(gn.getAnchorX() + overlapp + listSpace * -5);
 						gn.setAnchorY(gn.getAnchorY() + ySpace);
-						ySpace+= 100;
+						ySpace += 100;
 
 					}
-					
+
 				}
-				
-				
-				if(gn.left != null)
-				{
-					gn.left.setAnchorX(gn.left.getAnchorX() - (getChildCount(gn)*2) - branchSpace);
+
+				if (gn.left != null) {
+					gn.left.setAnchorX(gn.left.getAnchorX() - (getChildCount(gn) * 2) - branchSpace);
 				}
-				
-				if(gn.right != null)
-				{
-					gn.right.setAnchorX(gn.right.getAnchorX() + (getChildCount(gn)*2) + branchSpace);
+
+				if (gn.right != null) {
+					gn.right.setAnchorX(gn.right.getAnchorX() + (getChildCount(gn) * 2) + branchSpace);
 				}
 			}
-			
+
 		}
 
+		for (gNode gn : listElements) {
 
-		
-		
-		for(gNode gn: listElements)
-		{
-			
-				if(gn.next != null)
-				{
-					int overlapp =   getRightest(gn).x - getLeftest(gn.next).x;
-					
-					//gn.next.setAnchorX(gn.next.getAnchorX() + overlapp + listSpace);
-					gn.next.updateXPos(-overlapp + listSpace);
+			if (gn.next != null) {
+				int overlapp = getRightest(gn).x - getLeftest(gn.next).x;
 
+				// gn.next.setAnchorX(gn.next.getAnchorX() + overlapp +
+				// listSpace);
+				gn.next.updateXPos(-overlapp + listSpace);
+
+			}
+
+		}
+
+	}
+
+	public int getCollisionCount() {
+		int collisions = 0;
+
+		for (gNode g1 : gnodes) {
+
+			for (gNode g2 : gnodes) {
+				if (g1.getBounds().intersects(g2.getBounds())) {
+					collisions++;
 				}
 
-		
+			}
 		}
-		
-		
-		
-		
-		
-		
-		
-			 
-	}
-	
-	public int getCollisionCount()
-	{
-		int collisions = 0;
-		
-		  for(gNode g1 : gnodes)
-		  {
-			  
-			  for(gNode g2 : gnodes)
-			  {
-				  if(g1.getBounds().intersects(g2.getBounds()))
-				  {
-					 collisions++;
-				  }
-					  
-			  }	  
-		  }
-		  
-		 return collisions;
+
+		return collisions;
 	}
 
-	
 	public void drawLines() {
 		// Node Lines
 		for (gNode gn : gnodes) {
 			if (gn.listelement) {
 				if (gn.next != null) {
-					screen.lines.add(new Line(gn.a.x + (gn.width), gn.a.y, gn.next.a.x + (gn.width), gn.next.a.y,Color.GRAY));
+					screen.lines.add(
+							new Line(gn.a.x + (gn.width), gn.a.y, gn.next.a.x + (gn.width), gn.next.a.y, Color.GRAY));
 				}
 			}
 
 			if (gn.left != null) {
-				
-					
-				Line l = new Line(gn.a.x + (gn.width), gn.a.y + (gn.height / 2)+5, gn.left.a.x + (gn.width), gn.left.a.y, Color.BLACK);
-				
-				if(gn.name.equals("STATSEQ"))
+
+				Line l = new Line(gn.a.x + (gn.width), gn.a.y + (gn.height / 2) + 5, gn.left.a.x + (gn.width),
+						gn.left.a.y, Color.BLACK);
+
+				if (gn.name.equals("STATSEQ"))
 					l.c = Color.GRAY;
-					
+
 				screen.lines.add(l);
 			}
 
 			if (gn.right != null) {
-				screen.lines.add(new Line(gn.a.x + (gn.width), gn.a.y + (gn.height / 2)+5, gn.right.a.x + (gn.width),
+				screen.lines.add(new Line(gn.a.x + (gn.width), gn.a.y + (gn.height / 2) + 5, gn.right.a.x + (gn.width),
 						gn.right.a.y, Color.BLACK));
 			}
 		}
 
 	}
-	
-	public ArrayList<gNode> getChildren(gNode n, boolean checkNext)
-	{
+
+	public ArrayList<gNode> getChildren(gNode n, boolean checkNext) {
 		ArrayList<gNode> childs = new ArrayList<gNode>();
-		
-		if(n.left != null)
-		{
+
+		if (n.left != null) {
 			childs.addAll(getChildren(n.left, true));
 			childs.add(n.left);
 		}
-	
-		
-		
-		if(n.right != null)
-		{
+
+		if (n.right != null) {
 			childs.addAll(getChildren(n.right, true));
 			childs.add(n.right);
 		}
-	
-		if(checkNext)
-		{
-			if(n.next != null)
-			{
+
+		if (checkNext) {
+			if (n.next != null) {
 				childs.addAll(getChildren(n.next, true));
 				childs.add(n.next);
 			}
 		}
-		
-		
+
 		return childs;
-		
+
 	}
 
-	public Anchor getRightest(gNode n)
-	{
+	public Anchor getRightest(gNode n) {
 		ArrayList<gNode> childs = getChildren(n, false);
-		
+
 		Anchor a = n.a;
-		
-		for(gNode n1: childs)
-		{
+
+		for (gNode n1 : childs) {
 			Anchor current = n1.a;
-			
-			if(current.x > a.x)
-			{
+
+			if (current.x > a.x) {
 				a = current;
 			}
-			
+
 		}
-		
-		return a;
-	}
-	
-	public Anchor getLeftest(gNode n)
-	{
-		ArrayList<gNode> childs = getChildren(n, false);
-		
-		Anchor a = n.a;
-		
-		
-		for(gNode n1: childs)
-		{
-			Anchor current = n1.a;
-			
-			if(current.x < a.x)
-			{
-				a = current;
-			}
-			
-		}
-		
 
 		return a;
 	}
-	
-	
-	public gNode getLastRight(gNode n)
-	{
-		gNode last = null;
-		
-		for(gNode g = n; true; g = g.right)
-		{
-			if(g != null)
-			{
-				last = g;
-			}else
-			{
-				break;
+
+	public Anchor getLeftest(gNode n) {
+		ArrayList<gNode> childs = getChildren(n, false);
+
+		Anchor a = n.a;
+
+		for (gNode n1 : childs) {
+			Anchor current = n1.a;
+
+			if (current.x < a.x) {
+				a = current;
 			}
+
 		}
-		
-		return last;
+
+		return a;
 	}
-	
-	public gNode getLastLeft(gNode n)
-	{
+
+	public gNode getLastRight(gNode n) {
 		gNode last = null;
-		
-		for(gNode g = n; true; g = g.left)
-		{
-			if(g != null)
-			{
+
+		for (gNode g = n; true; g = g.right) {
+			if (g != null) {
 				last = g;
-			}else
-			{
+			} else {
 				break;
 			}
 		}
-		
+
 		return last;
 	}
 
-	public int getChildCount(gNode n)
-	{
+	public gNode getLastLeft(gNode n) {
+		gNode last = null;
+
+		for (gNode g = n; true; g = g.left) {
+			if (g != null) {
+				last = g;
+			} else {
+				break;
+			}
+		}
+
+		return last;
+	}
+
+	public int getChildCount(gNode n) {
 		return getChildren(n, false).size();
 	}
 
@@ -298,15 +246,14 @@ public class NodeIterator {
 			g.name = n.val + "";
 		} else if (n.kind == Node.FLOATCON) {
 			g.name = n.fVal + "";
-			
+
 		} else if (n.kind == Node.DOUBLECON) {
 			g.name = n.dVal + "";
-			
-		} else 
-			if (n.kind == Node.BOOLCON) {
-				g.name = n.bVal + "";
-				
-			} else if (n.kind == Node.STRINGCON) {
+
+		} else if (n.kind == Node.BOOLCON) {
+			g.name = n.bVal + "";
+
+		} else if (n.kind == Node.STRINGCON) {
 			g.name = n.sVal;
 		} else if (n.kind == Node.CHARCON) {
 			g.name = Character.toChars(n.val)[0] + "";
@@ -328,14 +275,12 @@ public class NodeIterator {
 			g.next.listelement = true;
 			g.next.parent = g;
 
-
 		} else {
 			if (currentHead) {
 				g.isTail = true;
 			}
 
 			currentHead = false;
-
 
 		}
 
@@ -351,8 +296,6 @@ public class NodeIterator {
 
 		gnodes.add(g);
 
-		
-		
 		return g;
 
 	}

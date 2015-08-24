@@ -18,7 +18,6 @@ public class gNode extends JComponent {
 
 	public int height = 30, width = 80;
 
-
 	public gNode(String name, Anchor a) {
 
 		this.name = name;
@@ -28,7 +27,6 @@ public class gNode extends JComponent {
 
 	}
 
-	
 	public gNode(String name, Anchor a, gNode parent) {
 
 		this.name = name;
@@ -41,13 +39,13 @@ public class gNode extends JComponent {
 
 	public void setAnchorY(int y) {
 		this.a.y = y;
-		
+
 		updateAnchor(a);
 	}
 
 	public void setAnchorX(int x) {
 		this.a.x = x;
-		
+
 		updateAnchor(a);
 	}
 
@@ -70,13 +68,11 @@ public class gNode extends JComponent {
 		n = new Anchor(a.x + width, a.y);
 
 	}
-	
-	public void updateXPos(int delta)
-	{
+
+	public void updateXPos(int delta) {
 		a.x -= delta;
 		setBounds(a.x + (width / 2), a.y, width, height);
-		
-		
+
 		if (left != null) {
 			left.updateXPos(delta);
 		}
@@ -86,13 +82,13 @@ public class gNode extends JComponent {
 		if (next != null) {
 			next.updateXPos(delta);
 		}
-		
+
 	}
 
 	public void updateAnchor(Anchor an) {
-		
+
 		this.a = an;
-		
+
 		init();
 
 		if (left != null) {
