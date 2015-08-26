@@ -481,7 +481,7 @@ Expr <out exp_n>										(.
 														.)
 ")" ";"
 |
-"printLine"												(. line = t.line; .)
+"println"												(. line = t.line; .)
 "("
 Expr <out exp_n>										(.
 															stm_n = new Node(Node.PRINTLN, exp_n, null, Tab.noType);
@@ -524,7 +524,14 @@ Expr <out exp_n> ";"								(.
 														stm_n = new Node(Node.RETURN, exp_n, null, Tab.noType); 
 														stm_n.line = line;
 													.) 					
-| ";"
+|
+	"break;"										(. 	line = t.line; 
+														
+														stm_n = new Node(Node.BREAK, null, null, Tab.noType); 
+														stm_n.line = line;
+													.) 
+|
+";"
 ).
 //-------------------------------------------------------------------------
 ActPars	<out NodeList act_nl>			(. Node exp_n; act_nl = new NodeList();.)
@@ -608,12 +615,24 @@ Term <out trm_n1> 						(. exp_n = trm_n1; .)
  
 										if(	trm_n1.type.isPrimitive() == true && trm_n2.type.isPrimitive() == true)
 										{	
+										
+												if(trm_n1.type.kind == Struct.BOOL || trm_n2.type.kind == Struct.BOOL )
+												{
+													SemErr("Booleans can't be used in Expr operations!");
+												}
+												
+												if(trm_n1.type.kind == Struct.CHAR || trm_n2.type.kind == Struct.CHAR )
+												{
+													SemErr("Chars can't / shouldn't be used in Expr operations!");
+												}
+											
 												exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
 												trm_n1 = exp_n;
 													
 										}else
 											if(trm_n1.type.kind == Struct.STRING && trm_n2.type.kind == Struct.STRING)
 											{
+												
 												exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
 												trm_n1 = exp_n;
 											}else
@@ -634,6 +653,23 @@ Factor <out fac_n2>						(.
 										if((!fac_n1.type.isPrimitive() && !fac_n2.type.isPrimitive()))
 											if((fac_n1.type.kind != Struct.STRING && fac_n2.type.kind != Struct.STRING))
 											{SemErr("Both factors must be a primitive or strings!");}
+											
+											if(fac_n1.type.kind == Struct.BOOL || fac_n2.type.kind == Struct.BOOL )
+											{
+												SemErr("Booleans can't be used in Term operations!");
+											}
+											
+											if(fac_n1.type.kind == Struct.CHAR || fac_n2.type.kind == Struct.CHAR )
+											{
+												SemErr("Chars can't / shouldn't be used in Term operations!");
+											}
+											
+											if((fac_n1.type.kind == Struct.STRING || fac_n2.type.kind == Struct.STRING) && operator == Node.TIMES )
+											{
+												SemErr("Strings can't be multiplied!");
+											}
+											
+											
 										
 											trm_n = new Node(operator, fac_n1, fac_n2, fac_n1.type);
 											fac_n1 = trm_n;
@@ -679,7 +715,7 @@ ActPars	<out act_nl>
 | stringCon								(. fac_n = new Node(stringVal(t.val)); .)
 										
 | "read" "(" ")"						(. 	fac_n = new Node(Node.READ, null, null, Tab.charType); .)
-| "readLine" "(" ")"					(. 	fac_n = new Node(Node.READLN, null, null, Tab.stringType); .)
+| "readln" "(" ")"						(. 	fac_n = new Node(Node.READLN, null, null, Tab.stringType); .)
 | "length" "(" Expr <out exp_n> ")"		(. 
 											fac_n = new Node(Node.LENGTH, exp_n, null, Tab.intType); 
 											

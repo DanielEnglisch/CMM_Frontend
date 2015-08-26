@@ -19,7 +19,7 @@ public final class Node {
 			IF = 3, // if statement without else branch
 			IFELSE = 4, // if statement with else branch
 			WHILE = 5, // while statement
-			FORHEAD = 40, FOR = 41, RETURN = 6, // return statement
+			FORHEAD = 40, FOR = 41, RETURN = 6, BREAK = 49, // return statement
 			TRAP = 7, // trap if a function reaches its end without a return
 			// ------------ leaf expressions
 			IDENT = 8, // identifier
@@ -198,7 +198,7 @@ public final class Node {
 			"INTCON", "FLOATCON", "CHARCON", "STRINGCON", "INDEX", "PLUS", "MINUS", "MUL", "DIV", "REM", "I2F", "F2I",
 			"I2C", "C2I", "A2S", "EQL", "NEQ", "LSS", "LEQ", "GTR", "GEQ", "NOT", "OR", "AND", "READ", "?Unknown?",
 			"PRINT", "LENGTH", "DOUBLE", "D2I", "BOOLCON", "FORHEAD", "FOR", "C2F", "I2D", "F2D", "C2D", "C2S",
-			"READLN", "PRINTLN" };
+			"READLN", "PRINTLN", "BREAK" };
 
 	private static String[] typ = { "None", "Int", "Float", "Char", "Bool", "String", "Arr", "Double" };
 
