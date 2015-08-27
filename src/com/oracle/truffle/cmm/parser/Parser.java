@@ -117,6 +117,7 @@ public class Parser {
 	
 // ---------------- Casting -------------------------//
 
+
 	public Node cast(Struct type, Node fac_n) {
 
 		if (type.kind == Struct.INT) {
@@ -128,20 +129,26 @@ public class Parser {
 
 			} else if (fac_n.type.kind == Struct.CHAR) {
 				return new Node(Node.C2I, fac_n, null, type);
-			} else
+			} else if (fac_n.type.kind == Struct.STRING) {
+				return new Node(Node.S2I, fac_n, null, type);
+			}else
 				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to INT!");
 
 		} else if (type.kind == Struct.CHAR) {
 			if (fac_n.type.kind == Struct.INT) {
 				return new Node(Node.I2C, fac_n, null, type);
-			} else
+			} else if (fac_n.type.kind == Struct.STRING) {
+				return new Node(Node.S2C, fac_n, null, type);
+			}else
 				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to CHAR!");
 		} else if (type.kind == Struct.FLOAT) {
 			if (fac_n.type.kind == Struct.INT) {
 				return new Node(Node.I2F, fac_n, null, type);
 			} else if (fac_n.type.kind == Struct.CHAR) {
 				return new Node(Node.C2F, fac_n, null, type);
-			} else
+			} else if (fac_n.type.kind == Struct.STRING) {
+				return new Node(Node.S2F, fac_n, null, type);
+			}else
 				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to FLOAT!");
 		} else if (type.kind == Struct.DOUBLE) {
 			if (fac_n.type.kind == Struct.INT) {
@@ -150,7 +157,9 @@ public class Parser {
 				return new Node(Node.F2D, fac_n, null, type);
 			} else if (fac_n.type.kind == Struct.CHAR) {
 				return new Node(Node.C2D, fac_n, null, type);
-			} else
+			} else if (fac_n.type.kind == Struct.STRING) {
+				return new Node(Node.S2D, fac_n, null, type);
+			}else
 				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to DOUBLE!");
 		} else if (type.kind == Struct.STRING) {
 
@@ -159,8 +168,14 @@ public class Parser {
 				return new Node(Node.A2S, fac_n, null, type);
 			} else if (fac_n.type.kind == Struct.CHAR) {
 				return new Node(Node.C2S, fac_n, null, type);
-			} else
-				SemErr("Array must be of type CHAR to be casted to STRING!");
+			} else if (fac_n.type.kind == Struct.INT) {
+				return new Node(Node.I2S, fac_n, null, type);
+			}else if (fac_n.type.kind == Struct.FLOAT) {
+				return new Node(Node.F2S, fac_n, null, type);
+			}else if (fac_n.type.kind == Struct.DOUBLE) {
+				return new Node(Node.D2S, fac_n, null, type);
+			}else
+				SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to STRING!");
 
 		} else
 			SemErr("Can't cast " + fac_n.getKindName(fac_n.kind) + " to " + type.getKindName(type.kind));
@@ -215,6 +230,10 @@ public class Parser {
 		//BOOL = X
 		else if(des == Struct.BOOL && exp == Struct.BOOL)
 			return true;
+			
+		//Array = X;
+		else if(des == Struct.ARR && exp == Struct.ARR)
+		return true;
 		
 		return false;
 	}
@@ -513,9 +532,9 @@ public class Parser {
 				SemErr("Designator must be a variable!");
 				}
 				}
-																		if(exp_n.type.kind != Struct.STRING && !exp_n.type.isPrimitive())
+																		if(exp_n.type.kind != Struct.STRING && !exp_n.type.isPrimitive() && exp_n.type.kind != Struct.ARR)
 				{
-				SemErr("Expression must be primitive or a string!");
+				SemErr("Expression must be primitive or a string or an array!");
 				}
 				else
 				if(!isCompatible(des_n.type.kind, exp_n.type.kind))
@@ -718,10 +737,12 @@ public class Parser {
 			if(	trm_n1.type.isPrimitive() == true && trm_n2.type.isPrimitive() == true)
 			{	
 			
-				if(trm_n1.type.kind == Struct.BOOL || trm_n2.type.kind == Struct.BOOL )
-				{
-					SemErr("Booleans can't be used in Expr operations!");
-				}
+			if(	trm_n1.type.kind == Struct.BOOL ||
+			trm_n2.type.kind == Struct.BOOL)
+			{
+			SemErr("Booleans can't be used in Expr operations!");
+			}	
+			
 				
 				if(trm_n1.type.kind == Struct.CHAR || trm_n2.type.kind == Struct.CHAR )
 				{
@@ -737,8 +758,20 @@ public class Parser {
 				
 				exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
 				trm_n1 = exp_n;
+			}
+			else if(trm_n1.type.kind == Struct.ARR && trm_n2.type.kind == Struct.ARR)
+			{
+									if(	trm_n1.obj.type.elemType.kind == Struct.BOOL
+				|| trm_n2.obj.type.elemType.kind == Struct.BOOL)
+				{
+				SemErr("Boolean Arrays can't be used in Expr operations!");
+				}	
+				
+				exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+				trm_n1 = exp_n;
+			
 			}else
-				SemErr("Both terms must be a primitive or strings!");
+				SemErr("Both terms must be a primitive or strings or arrays!");
 			
 			
 			
@@ -873,11 +906,19 @@ public class Parser {
 			fac_n2 = Factor();
 			if((!fac_n1.type.isPrimitive() && !fac_n2.type.isPrimitive()))
 			if((fac_n1.type.kind != Struct.STRING && fac_n2.type.kind != Struct.STRING))
-			{SemErr("Both factors must be a primitive or strings!");}
+				if((fac_n1.type.kind != Struct.ARR && fac_n2.type.kind != Struct.ARR))
+					{SemErr("Both factors must be a primitive or strings or arrays!");}
 			
-			if(fac_n1.type.kind == Struct.BOOL || fac_n2.type.kind == Struct.BOOL )
+			if (fac_n1.type.kind == Struct.BOOL || fac_n2.type.kind == Struct.BOOL)
 			{
 				SemErr("Booleans can't be used in Term operations!");
+			}
+			
+			if(fac_n1.type.kind == Struct.ARR && fac_n2.type.kind == Struct.ARR)
+			{
+				if(fac_n1.obj.type.elemType.kind == Struct.BOOL
+			|| fac_n2.obj.type.elemType.kind == Struct.BOOL)
+				SemErr("Bool Arrays can't be used in Term operations!");
 			}
 			
 			if(fac_n1.type.kind == Struct.CHAR || fac_n2.type.kind == Struct.CHAR )
@@ -977,9 +1018,9 @@ public class Parser {
 			Expect(8);
 			fac_n = new Node(Node.LENGTH, exp_n, null, Tab.intType); 
 			
-			if(exp_n.type.kind != Struct.STRING)
+			if(exp_n.type.kind != Struct.STRING && exp_n.type.kind != Struct.ARR)
 			{
-			SemErr("lenght() parameter must be a string!");
+			SemErr("lenght() parameter must be a string or an array!");
 			}
 			
 		} else if (la.kind == 40) {

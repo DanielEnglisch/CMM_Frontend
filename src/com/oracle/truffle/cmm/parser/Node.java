@@ -11,7 +11,7 @@ a part of an expression have a type.
 
 public final class Node {
 
-	public static final int // node kinds
+	public static final int // node kinds -> 49
 	// ----------- statements
 	STATSEQ = 0, // statement sequence
 			ASSIGN = 1, // assignment
@@ -37,15 +37,15 @@ public final class Node {
 			DIV = 17, // /
 			REM = 18, // %
 			// Cast:
-			F2I = 20, D2I = 38, C2I = 22,
+	F2I = 20, D2I = 38, C2I = 22, S2I = 50,
 
-	I2F = 19, C2F = 42,
+	I2F = 19, C2F = 42, S2F = 51,
 
-	I2D = 43, F2D = 44, C2D = 45,
+	I2D = 43, F2D = 44, C2D = 45 , S2D = 52,
 
-	I2C = 21,
+	I2C = 21, S2C = 53,
 
-	A2S = 23, C2S = 46,
+	A2S = 23, C2S = 46, I2S = 54,F2S = 55,D2S = 56,
 
 	// ------------ conditionals
 			EQL = 24, // ==
@@ -61,6 +61,13 @@ public final class Node {
 			READLN = 47, UKN = 34, // Unknown
 			PRINT = 35, // print();
 			PRINTLN = 48, LENGTH = 36; // lenght(string);
+	
+	
+	public static String[] name = { "STATSEQ", "ASSIGN", "CALL", "IF", "IFELSE", "WHILE", "RETURN", "TRAP", "IDENT",
+			"INTCON", "FLOATCON", "CHARCON", "STRINGCON", "INDEX", "PLUS", "MINUS", "MUL", "DIV", "REM", "I2F", "F2I",
+			"I2C", "C2I", "A2S", "EQL", "NEQ", "LSS", "LEQ", "GTR", "GEQ", "NOT", "OR", "AND", "READ", "?Unknown?",
+			"PRINT", "LENGTH", "DOUBLE", "D2I", "BOOLCON", "FORHEAD", "FOR", "C2F", "I2D", "F2D", "C2D", "C2S",
+			"READLN", "PRINTLN", "BREAK", "S2I" , "S2F", "S2D", "S2C", "I2S", "F2S", "D2S"};
 
 	public String getKindName(int kindID) {
 		switch (kindID) {
@@ -194,11 +201,7 @@ public final class Node {
 	// ----------------------- for dumping ASTs
 	// -----------------------------------
 
-	public static String[] name = { "STATSEQ", "ASSIGN", "CALL", "IF", "IFELSE", "WHILE", "RETURN", "TRAP", "IDENT",
-			"INTCON", "FLOATCON", "CHARCON", "STRINGCON", "INDEX", "PLUS", "MINUS", "MUL", "DIV", "REM", "I2F", "F2I",
-			"I2C", "C2I", "A2S", "EQL", "NEQ", "LSS", "LEQ", "GTR", "GEQ", "NOT", "OR", "AND", "READ", "?Unknown?",
-			"PRINT", "LENGTH", "DOUBLE", "D2I", "BOOLCON", "FORHEAD", "FOR", "C2F", "I2D", "F2D", "C2D", "C2S",
-			"READLN", "PRINTLN", "BREAK" };
+
 
 	private static String[] typ = { "None", "Int", "Float", "Char", "Bool", "String", "Arr", "Double" };
 
