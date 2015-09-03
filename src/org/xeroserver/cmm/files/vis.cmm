@@ -1,8 +1,8 @@
 void Main()
 {
-	char c;
-	c = 'c';
+	int i;
+	i  = 5+5/4;
 	
-	string s;
-	s = readLine();
+	int[3] ia;
+	ia[1] = 2;
 }

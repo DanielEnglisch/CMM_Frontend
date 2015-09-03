@@ -625,9 +625,9 @@ Relop <out int operator>				(. operator = Node.UKN; .)
 |	"<="								(. operator = Node.LEQ; .)
 .
 //-------------------------------------------------------------------------
-Expr <out Node exp_n>					(. Node trm_n1, trm_n2; int operator; .)
+Expr <out Node exp_n>					(. Node trm_n1, trm_n2; int operator; int line; .)
 = 
-Term <out trm_n1> 						(. exp_n = trm_n1; .)
+Term <out trm_n1> 						(. exp_n = trm_n1; line = t.line; .)
 										 
 {Addop <out operator>				
  Term <out trm_n2>						(. 
@@ -648,6 +648,7 @@ Term <out trm_n1> 						(. exp_n = trm_n1; .)
 												}
 											
 												exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+												exp_n.line = line;
 												trm_n1 = exp_n;
 													
 										}else
@@ -655,18 +656,20 @@ Term <out trm_n1> 						(. exp_n = trm_n1; .)
 											{
 												
 												exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+												exp_n.line = line;
 												trm_n1 = exp_n;
 											}
 											else if(trm_n1.type.kind == Struct.ARR && trm_n2.type.kind == Struct.ARR)
 											{
 
-															if(	trm_n1.obj.type.elemType.kind == Struct.BOOL
+												if(	trm_n1.obj.type.elemType.kind == Struct.BOOL
 												|| trm_n2.obj.type.elemType.kind == Struct.BOOL)
 												{
 												SemErr("Boolean Arrays can't be used in Expr operations!");
 												}	
 												
 												exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+												exp_n.line = line;
 												trm_n1 = exp_n;
 											
 											}else
@@ -677,9 +680,9 @@ Term <out trm_n1> 						(. exp_n = trm_n1; .)
 										.)
  }.
 //-------------------------------------------------------------------------
-Term <out Node trm_n>					(. Node fac_n1, fac_n2; int operator; .)				
+Term <out Node trm_n>					(. Node fac_n1, fac_n2; int operator; int line; .)				
 = 
-Factor <out fac_n1> 					(. trm_n = fac_n1; .)	
+Factor <out fac_n1> 					(. trm_n = fac_n1; line = t.line; .)	
 {
 Mulop  <out operator>					
 Factor <out fac_n2>						(.
@@ -714,6 +717,7 @@ Factor <out fac_n2>						(.
 											
 										
 											trm_n = new Node(operator, fac_n1, fac_n2, fac_n1.type);
+											trm_n.line = line;
 											fac_n1 = trm_n;
 										.)
  }.
@@ -786,10 +790,10 @@ ActPars	<out act_nl>
 | "(" Expr <out exp_n> ")"				(. fac_n = exp_n; .)
 ).
 //-------------------------------------------------------------------------
-Designator <out Node des_n>				(. Node exp_n; .)
+Designator <out Node des_n>				(. Node exp_n; int line; .)
 = 
 ident									(. Obj o = tab.find(t.val);
-									 	des_n = new Node(o); .)
+									 	des_n = new Node(o); line = t.line; .)
 									
 										
 											 
@@ -802,7 +806,7 @@ ident									(. Obj o = tab.find(t.val);
   
   										if(exp_n.type.kind != Struct.INT) {SemErr("Index must be of type INT!");}
   										
- 										des_n = new Node(Node.INDEX, des_n, exp_n, type ); .)
+ 										des_n = new Node(Node.INDEX, des_n, exp_n, type ); des_n.line = line; .)
   "]"
 |                                  
 ).						

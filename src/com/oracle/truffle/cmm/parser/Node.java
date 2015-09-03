@@ -230,7 +230,7 @@ public final class Node {
 				System.out.print(" " + x.obj.name);
 			if (x.type != null)
 				System.out.print(" type=" + typ[x.type.kind]);
-			if (x.kind >= STATSEQ && x.kind <= TRAP)
+			//if (x.kind >= STATSEQ && x.kind <= TRAP)
 				System.out.print(" line=" + x.line);
 			System.out.println();
 			if (x.left != null || x.right != null) {

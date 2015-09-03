@@ -707,10 +707,10 @@ public class Parser {
 
 	Node  Designator() {
 		Node  des_n;
-		Node exp_n; 
+		Node exp_n; int line; 
 		Expect(1);
 		Obj o = tab.find(t.val);
-		des_n = new Node(o); 
+		des_n = new Node(o); line = t.line; 
 		if (la.kind == 23) {
 			Get();
 			exp_n = Expr();
@@ -719,7 +719,7 @@ public class Parser {
 			else if (o.type.kind == Struct.ARR) {type = o.type.elemType;}
 			else {SemErr("Invalid Designator Type (must be string or array)!");}
 			if(exp_n.type.kind != Struct.INT) {SemErr("Index must be of type INT!");}
-			des_n = new Node(Node.INDEX, des_n, exp_n, type ); 
+			des_n = new Node(Node.INDEX, des_n, exp_n, type ); des_n.line = line; 
 			Expect(24);
 		} else if (StartOf(3)) {
 		} else SynErr(51);
@@ -728,9 +728,9 @@ public class Parser {
 
 	Node  Expr() {
 		Node  exp_n;
-		Node trm_n1, trm_n2; int operator; 
+		Node trm_n1, trm_n2; int operator; int line; 
 		trm_n1 = Term();
-		exp_n = trm_n1; 
+		exp_n = trm_n1; line = t.line; 
 		while (la.kind == 40 || la.kind == 41) {
 			operator = Addop();
 			trm_n2 = Term();
@@ -750,6 +750,7 @@ public class Parser {
 				}
 			
 				exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+				exp_n.line = line;
 				trm_n1 = exp_n;
 					
 			}else
@@ -757,17 +758,19 @@ public class Parser {
 			{
 				
 				exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+				exp_n.line = line;
 				trm_n1 = exp_n;
 			}
 			else if(trm_n1.type.kind == Struct.ARR && trm_n2.type.kind == Struct.ARR)
 			{
-									if(	trm_n1.obj.type.elemType.kind == Struct.BOOL
+						if(	trm_n1.obj.type.elemType.kind == Struct.BOOL
 				|| trm_n2.obj.type.elemType.kind == Struct.BOOL)
 				{
 				SemErr("Boolean Arrays can't be used in Expr operations!");
 				}	
 				
 				exp_n = new Node(operator, trm_n1, trm_n2, trm_n1.type);
+				exp_n.line = line;
 				trm_n1 = exp_n;
 			
 			}else
@@ -898,9 +901,9 @@ public class Parser {
 
 	Node  Term() {
 		Node  trm_n;
-		Node fac_n1, fac_n2; int operator; 
+		Node fac_n1, fac_n2; int operator; int line; 
 		fac_n1 = Factor();
-		trm_n = fac_n1; 
+		trm_n = fac_n1; line = t.line; 
 		while (la.kind == 42 || la.kind == 43 || la.kind == 44) {
 			operator = Mulop();
 			fac_n2 = Factor();
@@ -934,6 +937,7 @@ public class Parser {
 			
 			
 			trm_n = new Node(operator, fac_n1, fac_n2, fac_n1.type);
+			trm_n.line = line;
 			fac_n1 = trm_n;
 			
 		}
